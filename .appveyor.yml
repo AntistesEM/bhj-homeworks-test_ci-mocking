@@ -1,0 +1,21 @@
+image: Visual Studio 2017 # образ для сборки
+environment:
+  nodejs_version: "18"
+stack: node 18 # версия Node.js
+branches:
+  only:
+    - main  # ветка git
+cache: node_modules  # кэширование
+install:
+  - ps: |
+      Install-Product node $env:nodejs_version;
+      Start-Process powershell -ArgumentList '-ExecutionPolicy Bypass -NoProfile -NonInteractive -Command "iex((new-object net.webclient).DownloadString(''https://chocolatey.org/install.ps1''))"' -Verb RunAs;
+      choco install nvm;
+      nvm install $env:nodejs_version;
+      [Environment]::SetEnvironmentVariable("PATH", "$env:PATH;C:\ProgramData\nvm", "Machine");
+      nvm use $env:nodejs_version;
+      node --version;
+  - npm install  # команда установки зависимостей
+build: off
+test_script:
+  - npm run lint && npm test  # скрипт сборки
